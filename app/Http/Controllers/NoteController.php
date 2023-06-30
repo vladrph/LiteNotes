@@ -18,7 +18,9 @@ class NoteController extends Controller
     public function index()
     {
 
-        $notes = Note::where('user_id', Auth::id())->latest('updated_at')->paginate(5);
+       // $notes = Note::where('user_id', Auth::id())->latest('updated_at')->paginate(5);
+        //$notes = Auth::user() ->notes()->latest('updated_at')->paginate(5);
+        $notes = Note::whereBelongsTo(Auth::user())->latest('updated_at')->paginate(5);
         return view('notes.index')->with('notes',$notes);
 
         //
@@ -44,13 +46,12 @@ class NoteController extends Controller
             'text' => 'required'
         ]);
 
-       $note = New Note([
+       Auth::user()->notes()->create([
             'uuid' => Str::uuid(),
-            'user_id' => Auth::id(),
             'title' =>$request->title,
             'text'=> $request->text
         ]);
-        $note->save();
+        //$note->save();
         return to_route('notes.index');
         //
     }
@@ -116,7 +117,7 @@ class NoteController extends Controller
         }
         $note->delete();
 
-        return  to_route('notes.index')->with('success','Note deleted successfully');
+        return  to_route('notes.index')->with('success','Note Moved To Trash Successfully');
         //
     }
 }

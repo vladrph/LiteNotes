@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TrashedNoteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,16 +20,27 @@ Route::get('/', function () {
 });
 
 
-
 //get
 //update
 //destroy
 
-Route::resource('/notes',\App\Http\Controllers\NoteController::class)->middleware(['auth']);
+Route::resource('/notes', \App\Http\Controllers\NoteController::class)->middleware(['auth']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/trashed', [TrashedNoteController::class, 'index'])->middleware('auth')->name('trashed.index');
+
+
+Route::prefix('/trashed')->name('trashed.')->middleware('auth')->group(function(){
+    Route::get('/', [TrashedNoteController::class, 'index'])->name('index');
+    Route::get('/{note}', [TrashedNoteController::class, 'show'])->name('show')->withTrashed();
+    Route::put('/{note}', [TrashedNoteController::class, 'update'])->name('update')->withTrashed();
+    Route::delete('/{note}', [TrashedNoteController::class, 'destroy'])->name('destroy')->withTrashed();
+});
+
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -36,4 +48,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
